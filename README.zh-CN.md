@@ -1,8 +1,33 @@
+<div align="center">
+
 # SAP Functional Skill
 
-> SAP 业务领域 AI Skill 集合——十余年实战笔记，蒸馏为可被 AI 智能体直接复用的知识与执行技能包。
+[![GitHub Stars](https://img.shields.io/github/stars/shrek-abaper/sap-functional-skill?style=flat-square&color=FFD700&logo=github&logoColor=white&label=Stars)](https://github.com/shrek-abaper/sap-functional-skill/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/shrek-abaper/sap-functional-skill?style=flat-square&color=3E40C9&logo=github&logoColor=white&label=Forks)](https://github.com/shrek-abaper/sap-functional-skill/network/members)
+[![Contributors](https://img.shields.io/github/contributors/shrek-abaper/sap-functional-skill?style=flat-square&color=2EA043&logo=github&logoColor=white)](https://github.com/shrek-abaper/sap-functional-skill/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/shrek-abaper/sap-functional-skill?style=flat-square&color=0066CC&logo=github&logoColor=white)](https://github.com/shrek-abaper/sap-functional-skill/commits/main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![SKILL](https://img.shields.io/badge/SKILL-%E8%A7%84%E8%8C%83-7C3AED?style=flat-square&logo=markdown&logoColor=white)](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills)
 
-[English](README.md) | [中文](README.zh-CN.md)
+### 把 SAP 一线实战经验，打包成 AI 智能体可复用的 Skill
+
+#### *十余年 SAP 项目笔记蒸馏为知识型与执行型技能，在 SAP 话题出现的那一刻自动加载。*
+
+> 目前包含两个技能：覆盖 14 个模块、对话中检测到 SAP 话题即自动触发的被动知识库；以及通过 S/4HANA OData API 创建 STO 调拨订单、强制执行「先 preview 预览、后 create 创建」安全门禁的主动执行技能。遵循标准 SKILL 规范，Claude Code、OpenCode 及任何兼容的智能体框架均可直接加载。
+
+**知识型技能 &nbsp;·&nbsp; 执行型技能 &nbsp;·&nbsp; 自动触发路由 &nbsp;·&nbsp; 标准 SKILL 规范**
+
+**14 大 SAP 模块 &nbsp;·&nbsp; 15 个一线排查案例 &nbsp;·&nbsp; S/4HANA OData &nbsp;·&nbsp; SAP JCo / BAPI**
+
+**兼容 Claude Code &nbsp;·&nbsp; 兼容 OpenCode &nbsp;·&nbsp; MIT 许可 &nbsp;·&nbsp; 知识应该流动，不应该沉睡**
+
+#### 面向 SAP 功能顾问、ABAP 开发者，以及用 AI 智能体交付项目的团队
+
+**[项目背景](#项目背景)** &nbsp;·&nbsp; **[项目简介](#项目简介)** &nbsp;·&nbsp; **[sap-trench-skill](#sap-trench-skill)** &nbsp;·&nbsp; **[sap-sto-create](#sap-sto-create)** &nbsp;·&nbsp; **[安装与使用](#安装与使用)** &nbsp;·&nbsp; **[License](#license)**
+
+[English](README.md) &nbsp;·&nbsp; 中文
+
+</div>
 
 ---
 

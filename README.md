@@ -1,8 +1,33 @@
+<div align="center">
+
 # SAP Functional Skill
 
-> A collection of SAP business-domain AI skills — a decade of field notes distilled into reusable knowledge and execution packages for AI agents.
+[![GitHub Stars](https://img.shields.io/github/stars/shrek-abaper/sap-functional-skill?style=flat-square&color=FFD700&logo=github&logoColor=white&label=Stars)](https://github.com/shrek-abaper/sap-functional-skill/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/shrek-abaper/sap-functional-skill?style=flat-square&color=3E40C9&logo=github&logoColor=white&label=Forks)](https://github.com/shrek-abaper/sap-functional-skill/network/members)
+[![Contributors](https://img.shields.io/github/contributors/shrek-abaper/sap-functional-skill?style=flat-square&color=2EA043&logo=github&logoColor=white)](https://github.com/shrek-abaper/sap-functional-skill/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/shrek-abaper/sap-functional-skill?style=flat-square&color=0066CC&logo=github&logoColor=white)](https://github.com/shrek-abaper/sap-functional-skill/commits/main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![SKILL](https://img.shields.io/badge/SKILL-Specification-7C3AED?style=flat-square&logo=markdown&logoColor=white)](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills)
 
-[English](README.md) | [中文](README.zh-CN.md)
+### SAP Field Experience, Packaged as Reusable AI Agent Skills
+
+#### *A decade of SAP project notes distilled into knowledge and execution skills that load the moment an SAP question comes up.*
+
+> Two skills today: a passive knowledge base spanning 14 modules that auto-triggers on any SAP topic, and an active execution skill that creates STO transfer orders through the S/4HANA OData API — with a mandatory preview-before-create safety gate. Standard SKILL format: Claude Code, OpenCode, and any compatible agent framework load them as-is.
+
+**Knowledge Skills &nbsp;·&nbsp; Execution Skills &nbsp;·&nbsp; Auto-Trigger Routing &nbsp;·&nbsp; Standard SKILL Format**
+
+**14 SAP Modules &nbsp;·&nbsp; 15 Field Troubleshooting Cases &nbsp;·&nbsp; S/4HANA OData &nbsp;·&nbsp; SAP JCo / BAPI**
+
+**Claude Code Ready &nbsp;·&nbsp; OpenCode Ready &nbsp;·&nbsp; MIT Licensed &nbsp;·&nbsp; Knowledge Should Flow, Not Sleep**
+
+#### Built for SAP Functional Consultants, ABAP Developers, and Teams Delivering with AI Agents
+
+**[Background](#background)** &nbsp;·&nbsp; **[What's Inside](#whats-inside)** &nbsp;·&nbsp; **[sap-trench-skill](#sap-trench-skill)** &nbsp;·&nbsp; **[sap-sto-create](#sap-sto-create)** &nbsp;·&nbsp; **[Installation](#installation)** &nbsp;·&nbsp; **[License](#license)**
+
+English &nbsp;·&nbsp; [中文](README.zh-CN.md)
+
+</div>
 
 ---
 
