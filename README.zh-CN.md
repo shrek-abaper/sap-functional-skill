@@ -13,17 +13,17 @@
 
 #### *十余年 SAP 项目笔记蒸馏为知识型与执行型技能，在 SAP 话题出现的那一刻自动加载。*
 
-> 目前包含两个技能：覆盖 14 个模块、对话中检测到 SAP 话题即自动触发的被动知识库；以及通过 S/4HANA OData API 创建 STO 调拨订单、强制执行「先 preview 预览、后 create 创建」安全门禁的主动执行技能。遵循标准 SKILL 规范，Claude Code、OpenCode 及任何兼容的智能体框架均可直接加载。
+> 目前包含三个技能：覆盖 14 个模块、对话中检测到 SAP 话题即自动触发的被动知识库；通过 S/4HANA OData API 创建 STO 调拨订单、强制执行「先 preview 预览、后 create 创建」安全门禁的写入型执行技能；以及通过 REST2RFC 动态网关只读查询账面库存、MD04 供需与物料移动明细的只读型执行技能——白名单 BAPI 加受控直读表兜底。遵循标准 SKILL 规范，Claude Code、OpenCode 及任何兼容的智能体框架均可直接加载。
 
 **知识型技能 &nbsp;·&nbsp; 执行型技能 &nbsp;·&nbsp; 自动触发路由 &nbsp;·&nbsp; 标准 SKILL 规范**
 
-**14 大 SAP 模块 &nbsp;·&nbsp; 15 个一线排查案例 &nbsp;·&nbsp; S/4HANA OData &nbsp;·&nbsp; SAP JCo / BAPI**
+**14 大 SAP 模块 &nbsp;·&nbsp; 15 个一线排查案例 &nbsp;·&nbsp; S/4HANA OData &nbsp;·&nbsp; SAP JCo / BAPI &nbsp;·&nbsp; REST2RFC 只读网关**
 
 **兼容 Claude Code &nbsp;·&nbsp; 兼容 OpenCode &nbsp;·&nbsp; MIT 许可 &nbsp;·&nbsp; 知识应该流动，不应该沉睡**
 
 #### 面向 SAP 功能顾问、ABAP 开发者，以及用 AI 智能体交付项目的团队
 
-**[项目背景](#项目背景)** &nbsp;·&nbsp; **[项目简介](#项目简介)** &nbsp;·&nbsp; **[sap-trench-skill](#sap-trench-skill)** &nbsp;·&nbsp; **[sap-sto-create](#sap-sto-create)** &nbsp;·&nbsp; **[安装与使用](#安装与使用)** &nbsp;·&nbsp; **[License](#license)**
+**[项目背景](#项目背景)** &nbsp;·&nbsp; **[项目简介](#项目简介)** &nbsp;·&nbsp; **[sap-trench-skill](#sap-trench-skill)** &nbsp;·&nbsp; **[sap-sto-create](#sap-sto-create)** &nbsp;·&nbsp; **[sap-stock-availability](#sap-stock-availability)** &nbsp;·&nbsp; **[安装与使用](#安装与使用)** &nbsp;·&nbsp; **[License](#license)**
 
 [English](README.md) &nbsp;·&nbsp; 中文
 
@@ -47,12 +47,13 @@
 
 `sap-functional-skill` 是一个遵循标准 **SKILL 规范**的 SAP 业务领域 AI 技能包集合，适用于所有支持 SKILL 格式的 AI 智能体（包括 Claude Code、OpenCode 及其他兼容框架）。
 
-目前包含两个不同类型的 Skill：
+目前包含三个 Skill——一个知识型、两个执行型：
 
 | Skill | 类型 | 说明 |
 |---|---|---|
 | [`sap-trench-skill`](skills/sap-trench-skill/) | 知识型 | 被动触发——对话中检测到 SAP 话题即自动加载，涵盖 14 个模块参考文件 |
-| [`sap-sto-create`](skills/sap-sto-create/) | 执行型 | 主动触发——通过 S/4HANA OData API 创建 STO 调拨订单，Python + Java/JCo 实现 |
+| [`sap-sto-create`](skills/sap-sto-create/) | 执行型（写入） | 主动触发——通过 S/4HANA OData API 创建 STO 调拨订单，Python + Java/JCo，先 preview 后 create |
+| [`sap-stock-availability`](skills/sap-stock-availability/) | 执行型（只读） | 主动触发——经 REST2RFC 网关查询账面库存、MD04 供需与物料移动明细；白名单 BAPI 加受控直读表兜底，纯 Python |
 
 ---
 
@@ -128,6 +129,29 @@ python3 scripts/sap_sto_cli.py create \
 
 ---
 
+## sap-stock-availability
+
+通过 REST2RFC 动态网关只读查询 SAP 库存与物料可用性的执行型技能——不建服务、不起常驻进程、不写 MCP Server。可回答：按库存地点/批次的账面库存、MD04 供需快照、近期收发货明细，以及物料号消歧，全部调用均为只读。
+
+**核心设计**：
+
+- **四层只读闸门**——网关注册表（`ZTIF_GENERAL_CON`）、个人 SAP 账号只读授权、CLI 契约（必填筛选、行数上限、稳定退出码）、本地函数白名单（`catalog.json`）。
+- **受控兜底**——当白名单 BAPI 无法回答时才允许 `RFC_READ_TABLE`：限定库存域七张表（MARD/MCHB/MARC/MARM/MSKA/MKOL/MSKU），强制显式 FIELDS、主键过滤（MATNR/WERKS）、100 行上限、WHERE 行 72 字符。
+- **凭据零落盘**——网关 host/client/user 放在 `connection.json`（已被 git 忽略，仓库只提供 `connection.example.json` 模板）；口令仅通过 `getpass` 存入操作系统凭据库。
+
+### 快速上手
+
+```bash
+cd skills/sap-stock-availability
+cp connection.example.json connection.json   # 填 host / client / user
+python3 scripts/sap_stock.py credentials set  # 口令录入操作系统凭据库
+python3 scripts/sap_stock.py doctor
+```
+
+兜底契约与 S/4HANA 物料号内部格式陷阱见 [`skills/sap-stock-availability/README.md`](skills/sap-stock-availability/README.md) 与 `references/direct-table-reads.md`。
+
+---
+
 ## 安装与使用
 
 ```bash
@@ -136,8 +160,11 @@ git clone https://github.com/shrek-abaper/sap-functional-skill.git
 # 安装知识型技能
 cp -r sap-functional-skill/skills/sap-trench-skill ~/.agents/skills/
 
-# 安装执行型技能
+# 安装 STO 创建技能
 cp -r sap-functional-skill/skills/sap-sto-create ~/.agents/skills/
+
+# 安装库存只读查询技能
+cp -r sap-functional-skill/skills/sap-stock-availability ~/.agents/skills/
 ```
 
 Claude Code 会在对话启动时自动发现并加载已安装的技能。
@@ -170,24 +197,36 @@ sap-functional-skill/
     │       ├── troubleshooting.md
     │       ├── vms.md
     │       └── wm.md
-    └── sap-sto-create/            # 执行型技能——OData 创建 STO 订单
-        ├── SKILL.md               # 触发层 + 工具路由
+    ├── sap-sto-create/            # 执行型技能(写入)——OData 创建 STO 订单
+    │   ├── SKILL.md               # 触发层 + 工具路由
+    │   ├── README.md
+    │   ├── .env.example           # 环境变量模板
+    │   ├── evals/
+    │   │   └── evals.json
+    │   └── scripts/
+    │       ├── sap_sto_cli.py     # CLI 入口
+    │       ├── requirements.txt
+    │       └── lib/
+    │           ├── create_sto_odata.py   # 核心 OData 业务逻辑
+    │           └── java/
+    │               ├── SapDeliveryCreator.java
+    │               ├── sapjco3.jar
+    │               └── lib/              # 各平台 JCo 本地库
+    │                   ├── linux/
+    │                   ├── macos/
+    │                   └── windows/
+    └── sap-stock-availability/    # 执行型技能(只读)——库存与可用性查询
+        ├── SKILL.md               # 触发层 + 场景路由
         ├── README.md
-        ├── .env.example           # 环境变量模板
-        ├── evals/
-        │   └── evals.json
-        └── scripts/
-            ├── sap_sto_cli.py     # CLI 入口
-            ├── requirements.txt
-            └── lib/
-                ├── create_sto_odata.py   # 核心 OData 业务逻辑
-                └── java/
-                    ├── SapDeliveryCreator.java
-                    ├── sapjco3.jar
-                    └── lib/              # 各平台 JCo 本地库
-                        ├── linux/
-                        ├── macos/
-                        └── windows/
+        ├── catalog.json           # 函数白名单 + 兜底表白名单
+        ├── connection.example.json # 连接模板(真实配置 git 忽略)
+        ├── scripts/
+        │   ├── sap_stock.py       # CLI:doctor / credentials / describe / call
+        │   ├── sap_credentials.py # 操作系统凭据库层
+        │   └── rest2rfc_meta.py   # vendor 的网关元数据客户端
+        └── references/
+            ├── direct-table-reads.md
+            └── payloads/          # 核对过的请求/响应示例
 ```
 
 ---

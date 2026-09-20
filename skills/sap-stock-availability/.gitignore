@@ -6,6 +6,9 @@ secrets.json
 .env
 .env.*
 
+# 本地连接配置(含内网地址与个人账号):从 connection.example.json 拷贝后填写
+connection.json
+
 # 本地缓存与产物
 .cache/
 __pycache__/

@@ -4,6 +4,18 @@
 
 ---
 
+## [Unreleased]
+
+### sap-stock-availability — 真实 S/4HANA 首跑与受控直读表兜底(2026-09-20)
+
+- 首次对真实 S/4HANA(client 800)端到端联调:`doctor`、`describe`、`call` 全部跑通。
+- 新增 `RFC_READ_TABLE` **受控兜底**:catalog 表白名单(MARD/MCHB/MARC/MARM/MSKA/MKOL/MSKU),CLI 强制显式 FIELDS、主键 WHERE、ROWCOUNT ≤ 100、OPTIONS 行 ≤ 72 字符;新增 `references/direct-table-reads.md` 与实测报文样例。
+- 修正路由口径:`BAPI_MATERIAL_GET_DETAIL` 实测不返回库存数量(BAPIMATDOC 仅 PUR_GROUP/ISSUE_UNIT),不再作为账面库存路由。
+- vendor `rest2rfc_meta.py` 落地并打三处契约补丁:`?RFC=<FM>` 契约、`functionname` 字段、`--password-stdin`。
+- 记录网关侧两项缺陷:EXPORTING 参数不回传(GET_DETAIL 空体、ATP 标量丢失、MRP_STOCK_DETAIL 丢失)、非 200 响应丢弃错误 body。
+- `connection.json` 改为本地文件(git 忽略),仓库提供 `connection.example.json` 模板。
+- 根目录中英文 README 与 `CLAUDE.md` 收录第三个技能 sap-stock-availability。
+
 ## [1.0.0] - 2025-04-29
 
 ### 首次发布

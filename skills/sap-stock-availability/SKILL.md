@@ -24,11 +24,30 @@ description: 查询 SAP 库存与物料可用性(ATP 可用量、MD04 供需缺�
 
 | 场景问句 | 函数 | 必填筛选 | 口径说明 |
 | --- | --- | --- | --- |
-| 还有多少可用量 / 能不能发 | BAPI_MATERIAL_AVAILABILITY | 物料、工厂、单位、检查规则 | ATP 可用量,受检查规则影响,**不等于**账面库存 |
-| 什么时候缺料 / 供需缺口 | BAPI_MATERIAL_STOCK_REQ_LIST | 物料、工厂 | MD04 口径,含计划要素;是快照不是承诺 |
-| 各库存地点的账面数量 | BAPI_MATERIAL_GET_DETAIL | 物料、工厂 | 账面库存,不扣预留、不含在途 |
+| 还有多少可用量 / 能不能发 | BAPI_MATERIAL_AVAILABILITY | 物料、工厂、单位、检查规则 | ATP 可用量,受检查规则影响,**不等于**账面库存;当前网关不回传 EXPORTING 标量,暂取不到数 |
+| 什么时候缺料 / 供需缺口 | BAPI_MATERIAL_STOCK_REQ_LIST | 物料、工厂 | MD04 口径,含计划要素;是快照不是承诺;当前网关下仅工厂级 WB 汇总可用 |
+| 各库存地点的账面数量 / 批次库存 | RFC_READ_TABLE(受控兜底) | 表名、物料、工厂 | 直读 MARD/MCHB 当前值;不走转换出口;必须标注"直读表口径" |
+| 物料主数据工厂属性(采购组/发货单位) | BAPI_MATERIAL_GET_DETAIL | 物料、工厂 | 主数据属性,**不含库存数量**(实测 BAPIMATDOC 仅两字段);当前网关下返回空体 |
 | 最近的收发货明细 | BAPI_GOODSMVT_GETITEMS | 物料/工厂 + **日期区间** | 凭证行级;无日期区间会超时 |
 | 按描述找物料号 | BAPI_MATERIAL_GETLIST | 描述关键字 + 工厂 | 仅用于消歧,**不作为数据结论** |
+
+## 受控兜底:RFC_READ_TABLE(最后手段,不是首选)
+
+仅当以下**全部**成立才允许调用:
+
+1. 上表场景函数无法回答(未注册、返回空体、字段不覆盖),并已向用户说明原因;
+2. 目标表在 `catalog.json` 的 `table_allowlist` 内(当前:MARD/MCHB/MARC/MARM/MSKA/MKOL/MSKU);扩表需改 catalog 并经用户确认;
+3. 报文满足:FIELDS 显式列字段(禁止 SELECT *)、OPTIONS 必含主键过滤(白名单表现均需 MATNR+WERKS,仅 MARM 只要 MATNR;特殊库存再按供应商/客户/销售单行收窄)、ROWCOUNT ≤ 100、每个 OPTIONS 行 ≤ 72 字符。
+
+CLI 本地拦截违规,退出码 2:`TABLE_NOT_ALLOWED` / `EMPTY_FIELD_LIST` / `MISSING_FILTER` / `MISSING_KEY_FILTER` / `OPTION_LINE_TOO_LONG` / `ROWCOUNT_EXCEEDS_CAP`。本地守卫是**操作纪律,不是安全边界**——真正的闸门是网关注册表和 S_TABU_DIS 授权。
+
+直读表口径与陷阱:
+
+- 读到的是数据库当前值,不经过 BAPI 业务校验与转换出口;叙事必须写明"直读 \<表名\>"与时点,仍然**不得**与 ATP/MD04 数字相加。
+- S/4HANA 的 `MATNR` 为 40 位:非数字物料号**左对齐、尾部补空格**,等值条件直接写短码;查不到时先 `MARA` 上 `MATNR LIKE '%<物料号>'` 确认真实内部键,不要猜前导零位数。
+- 行缓冲 512 字节(TAB512),字段总长超限服务端抛 DATA_BUFFER_EXCEEDED → 减少 FIELDS 分次读。
+- 结果在 DATA 表的 WA 字符串里,按 DELIMITER 拆分;数量是压缩 DEC,需自行转数。
+- 表/字段语义、库存类别、实测报文见 `references/direct-table-reads.md`。
 
 ## 叙事输出格式
 
@@ -63,7 +82,7 @@ CLI 返回 `{"error":"NO_CREDENTIAL"}`、`{"error":"AUTH_REQUIRED"}` 或 `{"erro
 | 码 | 含义 | 动作 |
 | --- | --- | --- |
 | 0 | 成功 | 继续叙事 |
-| 2 | 参数错误(MISSING_PARAM / TYPE_MISMATCH / UNKNOWN_PARAM) | 重跑 describe 后修正报文,最多重试一次 |
+| 2 | 参数错误(MISSING_PARAM / TYPE_MISMATCH / UNKNOWN_PARAM,或兜底守卫各码) | 重跑 describe 后修正报文,最多重试一次 |
 | 3 | 认证/凭据问题 | 进入凭据配置引导,不重试 |
 | 4 | 函数未注册或未激活(404) | 告知用户需在 `ZTIF_GENERAL_CON` 注册,不改走其他函数 |
 | 5 | 超时/行数过大 | 要求用户收窄筛选条件后重试 |

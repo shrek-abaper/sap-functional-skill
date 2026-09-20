@@ -299,12 +299,81 @@ def cmd_call(args: argparse.Namespace) -> int:
         fail(EXIT_PAYLOAD, "MISSING_PARAM", missing=missing,
              hint="ask the user for these values; do not invent defaults")
 
+    if entry.get("fallback"):
+        guard_table_read(entry, payload)
+
     doc = gateway_call(conn, creds, args.function.upper(), payload)
     result = truncate(doc, int(args.max_rows or entry.get("max_rows", 200)))
     print(json.dumps({"ok": True, "function": args.function.upper(),
                       "semantics": entry["semantics"], **result},
                      ensure_ascii=False, indent=2))
     return EXIT_OK
+
+
+# Required key fields per allowlisted table. Plant-level stock tables need
+# WERKS; MARM (units) and MSKU (customer consignment W) are not plant-keyed.
+_TABLE_KEY_FILTERS = {
+    "MARD": ["MATNR", "WERKS"],
+    "MCHB": ["MATNR", "WERKS"],
+    "MARC": ["MATNR", "WERKS"],
+    "MARM": ["MATNR"],
+    "MSKA": ["MATNR", "WERKS"],
+    "MKOL": ["MATNR", "WERKS"],
+    "MSKU": ["MATNR", "WERKS"],
+}
+
+
+def guard_table_read(entry: Dict[str, Any], payload: Dict[str, Any]) -> None:
+    """Local contract for the RFC_READ_TABLE fallback. This is operational
+    discipline, NOT a security boundary -- the gateway registry and S_TABU_DIS
+    remain the real gates. It stops a careless agent from unfiltered scans."""
+    table = str(payload.get("query_table", "")).strip().upper()
+    allowlist = {str(t).strip().upper() for t in entry.get("table_allowlist", [])}
+    if table not in allowlist:
+        fail(EXIT_PAYLOAD, "TABLE_NOT_ALLOWED", table=table or None,
+             allowed=sorted(allowlist),
+             hint="generic table reads are a stock-domain fallback; extend the "
+                  "catalog table_allowlist to whitelist the table")
+
+    fields = payload.get("fields")
+    if (not isinstance(fields, list)
+            or not any(isinstance(f, dict) and str(f.get("fieldname", "")).strip()
+                       for f in fields)):
+        fail(EXIT_PAYLOAD, "EMPTY_FIELD_LIST",
+             hint="FIELDS must explicitly name the columns; broad reads are not allowed")
+
+    options = payload.get("options")
+    if not isinstance(options, list) or not all(isinstance(o, dict) for o in options):
+        options = []
+    clauses = [str(o.get("text", "")).strip() for o in options]
+    clauses = [c for c in clauses if c]
+    if not clauses:
+        fail(EXIT_PAYLOAD, "MISSING_FILTER",
+             hint="OPTIONS must contain the WHERE clause on key fields; no unfiltered reads")
+    for line in clauses:
+        if len(line) > 72:
+            fail(EXIT_PAYLOAD, "OPTION_LINE_TOO_LONG", length=len(line),
+                 hint="RFC_DB_OPT lines hold 72 chars; split the WHERE across several rows")
+
+    where = " ".join(clauses).upper()
+    for key_field in _TABLE_KEY_FILTERS[table]:
+        if key_field not in where:
+            fail(EXIT_PAYLOAD, "MISSING_KEY_FILTER", table=table, field=key_field,
+                 hint="the WHERE clause must constrain the primary key, e.g. MATNR/WERKS")
+
+    cap = int(entry.get("max_rows", 100))
+    raw_count = payload.get("rowcount")
+    if raw_count in (None, ""):
+        payload["rowcount"] = str(cap)
+    else:
+        try:
+            count = int(raw_count)
+        except (TypeError, ValueError):
+            fail(EXIT_PAYLOAD, "TYPE_MISMATCH", field="rowcount",
+                 hint="ROWCOUNT must be an integer")
+        if count <= 0 or count > cap:
+            fail(EXIT_PAYLOAD, "ROWCOUNT_EXCEEDS_CAP", rowcount=count, cap=cap,
+                 hint=f"fallback reads are capped at {cap} rows; narrow the filter")
 
 
 def _present(payload: Dict[str, Any], key: str) -> bool:

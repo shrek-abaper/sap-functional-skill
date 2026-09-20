@@ -13,17 +13,17 @@
 
 #### *A decade of SAP project notes distilled into knowledge and execution skills that load the moment an SAP question comes up.*
 
-> Two skills today: a passive knowledge base spanning 14 modules that auto-triggers on any SAP topic, and an active execution skill that creates STO transfer orders through the S/4HANA OData API — with a mandatory preview-before-create safety gate. Standard SKILL format: Claude Code, OpenCode, and any compatible agent framework load them as-is.
+> Three skills today: a passive knowledge base spanning 14 modules that auto-triggers on any SAP topic; an active execution skill that creates STO transfer orders through the S/4HANA OData API — with a mandatory preview-before-create safety gate; and a read-only execution skill that queries book stock, MD04 supply/demand and goods movements through the REST2RFC gateway — whitelisted BAPIs plus a guarded table-read fallback. Standard SKILL format: Claude Code, OpenCode, and any compatible agent framework load them as-is.
 
 **Knowledge Skills &nbsp;·&nbsp; Execution Skills &nbsp;·&nbsp; Auto-Trigger Routing &nbsp;·&nbsp; Standard SKILL Format**
 
-**14 SAP Modules &nbsp;·&nbsp; 15 Field Troubleshooting Cases &nbsp;·&nbsp; S/4HANA OData &nbsp;·&nbsp; SAP JCo / BAPI**
+**14 SAP Modules &nbsp;·&nbsp; 15 Field Troubleshooting Cases &nbsp;·&nbsp; S/4HANA OData &nbsp;·&nbsp; SAP JCo / BAPI &nbsp;·&nbsp; REST2RFC Read-Only**
 
 **Claude Code Ready &nbsp;·&nbsp; OpenCode Ready &nbsp;·&nbsp; MIT Licensed &nbsp;·&nbsp; Knowledge Should Flow, Not Sleep**
 
 #### Built for SAP Functional Consultants, ABAP Developers, and Teams Delivering with AI Agents
 
-**[Background](#background)** &nbsp;·&nbsp; **[What's Inside](#whats-inside)** &nbsp;·&nbsp; **[sap-trench-skill](#sap-trench-skill)** &nbsp;·&nbsp; **[sap-sto-create](#sap-sto-create)** &nbsp;·&nbsp; **[Installation](#installation)** &nbsp;·&nbsp; **[License](#license)**
+**[Background](#background)** &nbsp;·&nbsp; **[What's Inside](#whats-inside)** &nbsp;·&nbsp; **[sap-trench-skill](#sap-trench-skill)** &nbsp;·&nbsp; **[sap-sto-create](#sap-sto-create)** &nbsp;·&nbsp; **[sap-stock-availability](#sap-stock-availability)** &nbsp;·&nbsp; **[Installation](#installation)** &nbsp;·&nbsp; **[License](#license)**
 
 English &nbsp;·&nbsp; [中文](README.zh-CN.md)
 
@@ -47,12 +47,13 @@ That's the origin of **SAP Functional Skill**: starting from first-hand SAP fiel
 
 `sap-functional-skill` is a collection of SAP business-domain AI skill packages following the standard **SKILL specification**, compatible with any AI agent framework that supports the format (including Claude Code, OpenCode, and other compatible frameworks).
 
-The collection currently contains two skills of different types:
+The collection currently contains three skills — one knowledge skill and two execution skills:
 
 | Skill | Type | Description |
 |---|---|---|
 | [`sap-trench-skill`](skills/sap-trench-skill/) | Knowledge | Passive — auto-triggers on any SAP question. 14 reference files covering all major modules. |
-| [`sap-sto-create`](skills/sap-sto-create/) | Execution | Active — creates STO transfer orders via S/4HANA OData API. Python + Java/JCo. |
+| [`sap-sto-create`](skills/sap-sto-create/) | Execution (write) | Active — creates STO transfer orders via S/4HANA OData API. Python + Java/JCo. Preview-before-create gate. |
+| [`sap-stock-availability`](skills/sap-stock-availability/) | Execution (read-only) | Active — queries book stock, MD04 supply/demand and goods movements via the REST2RFC gateway. Whitelisted BAPIs plus a guarded table-read fallback. Python. |
 
 ---
 
@@ -128,6 +129,29 @@ See [`skills/sap-sto-create/README.md`](skills/sap-sto-create/README.md) for ful
 
 ---
 
+## sap-stock-availability
+
+A read-only execution skill for stock and material availability queries through the REST2RFC dynamic gateway — no local server, no resident process, no MCP server. It answers: book stock per storage location / batch, MD04 supply-demand snapshot, recent goods movement details, and material-number disambiguation. Every call is read-only.
+
+**Key design**:
+
+- **Four-layer read-only gate** — gateway registry (`ZTIF_GENERAL_CON`), personal SAP account with read authorizations, CLI contracts (mandatory filters, row caps, stable exit codes), and a local function whitelist (`catalog.json`).
+- **Guarded fallback** — when no whitelisted BAPI can answer, `RFC_READ_TABLE` is allowed only against a fixed stock-domain table allowlist (MARD/MCHB/MARC/MARM/MSKA/MKOL/MSKU), with explicit FIELDS, mandatory key filters (MATNR/WERKS), a 100-row cap, and 72-char WHERE lines.
+- **Zero credential footprint** — gateway host/client/user live in `connection.json` (git-ignored; template shipped as `connection.example.json`); the password is stored only in the OS keystore via `getpass`.
+
+### Quick Start
+
+```bash
+cd skills/sap-stock-availability
+cp connection.example.json connection.json   # fill host / client / user
+python3 scripts/sap_stock.py credentials set  # password goes to the OS keystore
+python3 scripts/sap_stock.py doctor
+```
+
+See [`skills/sap-stock-availability/README.md`](skills/sap-stock-availability/README.md) and `references/direct-table-reads.md` for the fallback contract and S/4HANA material-number formatting pitfalls.
+
+---
+
 ## Installation
 
 ```bash
@@ -136,8 +160,11 @@ git clone https://github.com/shrek-abaper/sap-functional-skill.git
 # Install the knowledge skill
 cp -r sap-functional-skill/skills/sap-trench-skill ~/.agents/skills/
 
-# Install the execution skill
+# Install the STO creation skill
 cp -r sap-functional-skill/skills/sap-sto-create ~/.agents/skills/
+
+# Install the read-only stock query skill
+cp -r sap-functional-skill/skills/sap-stock-availability ~/.agents/skills/
 ```
 
 Claude Code discovers and loads skills automatically at conversation startup.
@@ -170,24 +197,36 @@ sap-functional-skill/
     │       ├── troubleshooting.md
     │       ├── vms.md
     │       └── wm.md
-    └── sap-sto-create/            # Execution skill — STO order creation via OData
-        ├── SKILL.md               # Trigger layer + tool routing
+    ├── sap-sto-create/            # Execution skill (write) — STO creation via OData
+    │   ├── SKILL.md               # Trigger layer + tool routing
+    │   ├── README.md
+    │   ├── .env.example           # Environment config template
+    │   ├── evals/
+    │   │   └── evals.json
+    │   └── scripts/
+    │       ├── sap_sto_cli.py     # CLI entry point
+    │       ├── requirements.txt
+    │       └── lib/
+    │           ├── create_sto_odata.py   # Core OData logic
+    │           └── java/
+    │               ├── SapDeliveryCreator.java
+    │               ├── sapjco3.jar
+    │               └── lib/              # Platform-specific JCo native libs
+    │                   ├── linux/
+    │                   ├── macos/
+    │                   └── windows/
+    └── sap-stock-availability/    # Execution skill (read-only) — stock & ATP queries
+        ├── SKILL.md               # Trigger layer + scenario routing
         ├── README.md
-        ├── .env.example           # Environment config template
-        ├── evals/
-        │   └── evals.json
-        └── scripts/
-            ├── sap_sto_cli.py     # CLI entry point
-            ├── requirements.txt
-            └── lib/
-                ├── create_sto_odata.py   # Core OData logic
-                └── java/
-                    ├── SapDeliveryCreator.java
-                    ├── sapjco3.jar
-                    └── lib/              # Platform-specific JCo native libs
-                        ├── linux/
-                        ├── macos/
-                        └── windows/
+        ├── catalog.json           # Function whitelist + fallback table allowlist
+        ├── connection.example.json # Connection template (real one is git-ignored)
+        ├── scripts/
+        │   ├── sap_stock.py       # CLI: doctor / credentials / describe / call
+        │   ├── sap_credentials.py # OS keystore layer
+        │   └── rest2rfc_meta.py   # Vendored gateway metadata client
+        └── references/
+            ├── direct-table-reads.md
+            └── payloads/          # Verified request/response examples
 ```
 
 ---
@@ -202,7 +241,7 @@ Every knowledge card follows a fixed structure: **Phenomenon → Root Cause → 
 
 ## Compatible Platforms
 
-Both skills follow the standard SKILL specification and are compatible with any supporting framework:
+All skills follow the standard SKILL specification and are compatible with any supporting framework:
 
 - [Claude Code](https://claude.ai/code)
 - [OpenCode](https://github.com/opencode-ai/opencode)

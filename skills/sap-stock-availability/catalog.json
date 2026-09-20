@@ -4,28 +4,35 @@
   "functions": {
     "BAPI_MATERIAL_AVAILABILITY": {
       "required": ["plant", "material", "unit", "check_rule"],
-      "semantics": "ATP \u53ef\u7528\u91cf;\u53d7\u68c0\u67e5\u89c4\u5219\u5f71\u54cd;\u4e0d\u7b49\u4e8e\u8d26\u9762\u5e93\u5b58",
+      "semantics": "ATP 可用量;受检查规则影响;当前网关不回传 EXPORTING 标量(ATPQTY),网关 binder 修复前拿不到返回值",
       "max_rows": 200
     },
     "BAPI_MATERIAL_STOCK_REQ_LIST": {
       "required": ["material", "plant"],
-      "semantics": "MD04 \u4f9b\u9700\u5feb\u7167;\u542b\u8ba1\u5212\u8981\u7d20;\u975e\u627f\u8bfa",
+      "semantics": "MD04 供需快照;含计划要素;非承诺;当前网关只回传 TABLES,工厂级 WB 汇总可用,MRP_STOCK_DETAIL 结构(库存分类/单位)丢失",
       "max_rows": 500
     },
     "BAPI_MATERIAL_GET_DETAIL": {
       "required": ["material", "plant"],
-      "semantics": "\u8d26\u9762\u5e93\u5b58;\u4e0d\u6263\u9884\u7559;\u4e0d\u542b\u5728\u9014",
+      "semantics": "物料主数据工厂/估价属性(采购组、发货单位、价格);实测 BAPIMATDOC 仅 PUR_GROUP/ISSUE_UNIT,不含任何库存数量;当前网关下返回空体",
       "max_rows": 200
     },
     "BAPI_GOODSMVT_GETITEMS": {
       "required": ["material", "plant", "pstng_date_from", "pstng_date_to"],
-      "semantics": "\u7269\u6599\u51ed\u8bc1\u884c\u7ea7\u660e\u7ec6;\u5fc5\u987b\u7ed9\u65e5\u671f\u533a\u95f4",
+      "semantics": "物料凭证行级明细;必须给日期区间;TABLES 输出,当前网关可用",
       "max_rows": 500
     },
     "BAPI_MATERIAL_GETLIST": {
       "required": ["material_short_desc", "plant"],
-      "semantics": "\u4ec5\u7528\u4e8e\u7269\u6599\u53f7\u6d88\u6b67;\u4e0d\u4f5c\u6570\u636e\u7ed3\u8bba",
+      "semantics": "仅用于物料号消歧;不作数据结论;TABLES 输出,当前网关可用",
       "max_rows": 50
+    },
+    "RFC_READ_TABLE": {
+      "required": ["query_table", "fields", "options"],
+      "semantics": "直读表兜底;非 BAPI 口径;不走转换出口;不 JOIN;S/4 MATNR 为 40 位左对齐;必须带主键过滤与行数上限",
+      "fallback": true,
+      "max_rows": 100,
+      "table_allowlist": ["MARD", "MCHB", "MARC", "MARM", "MSKA", "MKOL", "MSKU"]
     }
   }
 }

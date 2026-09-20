@@ -1,9 +1,0 @@
-{
-  "host": "https://sap-dev.example.com:44300",
-  "path": "/sap/bc/rest2rfc",
-  "client": "100",
-  "user": "",
-  "ca_bundle": "",
-  "verify": false,
-  "timeout": 60
-}

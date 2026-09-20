@@ -1,0 +1,17 @@
+{
+  "_comment": "实测响应摘录 (S/4HANA client 800, 2026-09-20)。DATA-WA 按 FIELDS 顺序、以分号拼接;数量为三位小数字符串。CLI 输出时包在 data 字段内。",
+  "fields": [
+    {"fieldname": "MATNR", "offset": "000000", "length": "000040", "type": "C"},
+    {"fieldname": "WERKS", "offset": "000041", "length": "000004", "type": "C"},
+    {"fieldname": "LGORT", "offset": "000046", "length": "000004", "type": "C"},
+    {"fieldname": "LABST", "offset": "000051", "length": "000013", "type": "P"},
+    {"fieldname": "UMLME", "offset": "000066", "length": "000013", "type": "P"},
+    {"fieldname": "INSME", "offset": "000081", "length": "000013", "type": "P"},
+    {"fieldname": "EINME", "offset": "000096", "length": "000013", "type": "P"},
+    {"fieldname": "SPEME", "offset": "000111", "length": "000013", "type": "P"},
+    {"fieldname": "RETME", "offset": "000126", "length": "000013", "type": "P"}
+  ],
+  "data": [
+    {"wa": "P0274635AB                              ;5260;0001;59.000;0.000;0.000;0.000;0.000;0.000"}
+  ]
+}

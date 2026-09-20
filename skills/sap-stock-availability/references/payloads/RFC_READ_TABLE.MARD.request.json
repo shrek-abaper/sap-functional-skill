@@ -1,0 +1,18 @@
+{
+  "query_table": "MARD",
+  "delimiter": ";",
+  "fields": [
+    {"fieldname": "MATNR"},
+    {"fieldname": "WERKS"},
+    {"fieldname": "LGORT"},
+    {"fieldname": "LABST"},
+    {"fieldname": "UMLME"},
+    {"fieldname": "INSME"},
+    {"fieldname": "EINME"},
+    {"fieldname": "SPEME"},
+    {"fieldname": "RETME"}
+  ],
+  "options": [
+    {"text": "MATNR = 'P0274635AB' AND WERKS = '5260'"}
+  ]
+}

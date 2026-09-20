@@ -1,0 +1,9 @@
+{
+  "host": "http://<gateway-host>:<port>",
+  "path": "/sap/bc/rest2rfc",
+  "client": "<sap-client, e.g. 800>",
+  "user": "<your-personal-sap-user>",
+  "ca_bundle": "",
+  "verify": false,
+  "timeout": 60
+}
