@@ -1,0 +1,12 @@
+# 凭据零落盘:以下任何一项被提交都算事故
+ secrets.json
+secrets.json
+.sap-stock/
+*.env
+.env
+.env.*
+
+# 本地缓存与产物
+.cache/
+__pycache__/
+*.pyc

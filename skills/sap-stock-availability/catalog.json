@@ -1,0 +1,31 @@
+{
+  "scenario": "stock-availability",
+  "mode": "read-only",
+  "functions": {
+    "BAPI_MATERIAL_AVAILABILITY": {
+      "required": ["plant", "material", "unit", "check_rule"],
+      "semantics": "ATP \u53ef\u7528\u91cf;\u53d7\u68c0\u67e5\u89c4\u5219\u5f71\u54cd;\u4e0d\u7b49\u4e8e\u8d26\u9762\u5e93\u5b58",
+      "max_rows": 200
+    },
+    "BAPI_MATERIAL_STOCK_REQ_LIST": {
+      "required": ["material", "plant"],
+      "semantics": "MD04 \u4f9b\u9700\u5feb\u7167;\u542b\u8ba1\u5212\u8981\u7d20;\u975e\u627f\u8bfa",
+      "max_rows": 500
+    },
+    "BAPI_MATERIAL_GET_DETAIL": {
+      "required": ["material", "plant"],
+      "semantics": "\u8d26\u9762\u5e93\u5b58;\u4e0d\u6263\u9884\u7559;\u4e0d\u542b\u5728\u9014",
+      "max_rows": 200
+    },
+    "BAPI_GOODSMVT_GETITEMS": {
+      "required": ["material", "plant", "pstng_date_from", "pstng_date_to"],
+      "semantics": "\u7269\u6599\u51ed\u8bc1\u884c\u7ea7\u660e\u7ec6;\u5fc5\u987b\u7ed9\u65e5\u671f\u533a\u95f4",
+      "max_rows": 500
+    },
+    "BAPI_MATERIAL_GETLIST": {
+      "required": ["material_short_desc", "plant"],
+      "semantics": "\u4ec5\u7528\u4e8e\u7269\u6599\u53f7\u6d88\u6b67;\u4e0d\u4f5c\u6570\u636e\u7ed3\u8bba",
+      "max_rows": 50
+    }
+  }
+}

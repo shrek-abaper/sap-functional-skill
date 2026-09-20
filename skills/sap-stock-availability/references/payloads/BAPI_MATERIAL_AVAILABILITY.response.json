@@ -1,0 +1,14 @@
+{
+  "av_qty_plt": "120.000",
+  "dialogflag": "",
+  "ending": "",
+  "return": {
+    "type": "",
+    "id": "",
+    "number": "000",
+    "message": ""
+  },
+  "wmdvex": [
+    { "mng01": "120.000", "mng02": "0.000", "date": "20260915" }
+  ]
+}

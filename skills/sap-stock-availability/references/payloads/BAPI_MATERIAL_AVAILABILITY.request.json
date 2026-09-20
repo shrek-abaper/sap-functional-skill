@@ -1,0 +1,16 @@
+{
+  "plant": "1000",
+  "material": "000000000000123456",
+  "unit": "EA",
+  "check_rule": "A",
+  "stge_loc": "",
+  "batch": "",
+  "customer": "",
+  "doc_number": "",
+  "itm_number": "000000",
+  "dec_for_rounding": 0,
+  "read_atp_lock": "",
+  "read_project_stock": "",
+  "wmdvsx": [],
+  "wmdvex": []
+}
