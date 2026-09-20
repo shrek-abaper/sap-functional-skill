@@ -3,8 +3,8 @@
   "mode": "read-only",
   "functions": {
     "BAPI_MATERIAL_AVAILABILITY": {
-      "required": ["plant", "material", "unit", "check_rule"],
-      "semantics": "ATP 可用量;受检查规则影响;当前网关不回传 EXPORTING 标量(ATPQTY),网关 binder 修复前拿不到返回值",
+      "required": ["material", "plant", "unit", "check_rule", "wmdvsx"],
+      "semantics": "ATP 可用量;受检查规则影响;material 按 describe 骨架传结构、需求数量/日期走 wmdvsx 表;实测该函数在当前网关上任何报文(含空体)均 400,binder 绑定阶段失败,修复前不可用",
       "max_rows": 200
     },
     "BAPI_MATERIAL_STOCK_REQ_LIST": {
@@ -18,13 +18,13 @@
       "max_rows": 200
     },
     "BAPI_GOODSMVT_GETITEMS": {
-      "required": ["material", "plant", "pstng_date_from", "pstng_date_to"],
-      "semantics": "物料凭证行级明细;必须给日期区间;TABLES 输出,当前网关可用",
+      "required": ["material_ra", "plant_ra", "pstng_date_ra"],
+      "semantics": "物料凭证行级明细;全部入参都是范围表(SIGN/OPTION/LOW/HIGH);必须给过账日期区间;空结果时 RETURN 给 M7/842;TABLES 输出,当前网关可用",
       "max_rows": 500
     },
     "BAPI_MATERIAL_GETLIST": {
-      "required": ["material_short_desc", "plant"],
-      "semantics": "仅用于物料号消歧;不作数据结论;TABLES 输出,当前网关可用",
+      "required": ["materialshortdescsel", "plantselection"],
+      "semantics": "仅用于物料号消歧;不作数据结论;入参为选择表(materialshortdescsel 行字段 descr_low、plantselection 行字段 plant_low,通配用 I/CP);TABLES 输出,当前网关可用",
       "max_rows": 50
     },
     "RFC_READ_TABLE": {

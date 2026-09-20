@@ -90,3 +90,6 @@ $RECYCLE.BIN/
 *.bak
 extracted_notion_content.md
 EXECUTION_SUMMARY.md
+
+# 本地评测工作区(含真实系统查询产物)
+skills/sap-stock-availability-workspace/

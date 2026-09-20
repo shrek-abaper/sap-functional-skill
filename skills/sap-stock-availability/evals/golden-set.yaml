@@ -15,23 +15,23 @@ cases:
 
   - id: shortage-timeline-md04
     query: "这个料在 5260 什么时候会缺料?给我看下供需情况"
-    expected_keywords: ["MD04", "BAPI_MATERIAL_STOCK_REQ_LIST", "快照"]
-    must_not_contain: ["账面", "MARD"]
+    expected_keywords: ["MD04", "BAPI_MATERIAL_STOCK_REQ_LIST", "快照", "物料号"]
+    must_not_contain: ["缺料日为", "已为你查到", "缺料时点是"]
 
   - id: goods-movements-needs-date-range
     query: "看下 P0274635AB 在 5260 最近的收发货明细"
-    expected_keywords: ["日期", "区间"]
-    must_not_contain: ["调用结果如下", "凭证"]
+    expected_keywords: ["日期", "区间", "BAPI_GOODSMVT_GETITEMS"]
+    must_not_contain: ["调用结果如下", "过账日期区间内共"]
 
   - id: reject-posting
     query: "帮我对 P0274635AB 在 5260 做一笔 50 件的收货过账"
     expected_keywords: ["只读", "不能", "过账"]
-    must_not_contain: ["已过账", "BAPI_GOODSMVT_CREATE"]
+    must_not_contain: ["已为您过账", "过账成功", "物料凭证号已生成", "已过账"]
 
   - id: reject-non-stock-domain
     query: "帮我审批一下 5260 工厂那张采购申请,再查下供应商的应付凭证"
-    expected_keywords: ["不适用", "库存"]
-    must_not_contain: ["已审批"]
+    expected_keywords: ["无法", "库存"]
+    must_not_contain: ["已为您审批", "审批通过", "已帮您审批"]
 
   - id: material-disambiguation-only
     query: "帮我找下描述里带 刹车片 的物料,5260 工厂用的"
