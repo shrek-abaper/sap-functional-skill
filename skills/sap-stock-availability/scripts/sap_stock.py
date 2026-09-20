@@ -55,8 +55,13 @@ EXIT_OK, EXIT_PAYLOAD, EXIT_AUTH, EXIT_NOTREG, EXIT_LIMIT = 0, 2, 3, 4, 5
 
 
 def fail(code: int, error: str, **extra: Any) -> None:
-    """Emit a machine-readable error and stop. Never include credentials."""
-    print(json.dumps({"ok": False, "error": error, **extra}, ensure_ascii=False, indent=2))
+    """Emit a machine-readable error on stderr and stop. Never include credentials.
+
+    Exit codes are a deliberate domain protocol (3 = credential guidance,
+    4 = gateway registration, 5 = narrow the filter), documented in SKILL.md;
+    they intentionally do not mirror the generic 1/2/3/4/5 CLI convention."""
+    print(json.dumps({"ok": False, "error": error, **extra}, ensure_ascii=False, indent=2),
+          file=sys.stderr)
     sys.exit(code)
 
 

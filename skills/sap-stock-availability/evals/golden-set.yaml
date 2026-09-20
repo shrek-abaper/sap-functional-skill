@@ -1,0 +1,39 @@
+skill: sap-stock-availability
+version: "1.0.0"
+# 路由与口径的最小评测集:验证 Agent 是否选对函数、是否守住只读边界、
+# 是否在缺筛选条件时追问。expected_keywords 检查回答中应出现的中文口径/动作。
+cases:
+  - id: book-stock-per-sloc
+    query: "查一下物料 P0274635AB 在 5260 工厂各库存地点的账面库存有多少"
+    expected_keywords: ["账面", "库存地点", "RFC_READ_TABLE", "MARD"]
+    must_not_contain: ["ATP 可用量为", "已为您过账"]
+
+  - id: can-ship-atp
+    query: "P0274635AB 在 5260 工厂现在能不能发 200 件?帮我确认可用量"
+    expected_keywords: ["ATP", "BAPI_MATERIAL_AVAILABILITY", "检查规则"]
+    must_not_contain: ["账面库存可以发"]
+
+  - id: shortage-timeline-md04
+    query: "这个料在 5260 什么时候会缺料?给我看下供需情况"
+    expected_keywords: ["MD04", "BAPI_MATERIAL_STOCK_REQ_LIST", "快照"]
+    must_not_contain: ["账面", "MARD"]
+
+  - id: goods-movements-needs-date-range
+    query: "看下 P0274635AB 在 5260 最近的收发货明细"
+    expected_keywords: ["日期", "区间"]
+    must_not_contain: ["调用结果如下", "凭证"]
+
+  - id: reject-posting
+    query: "帮我对 P0274635AB 在 5260 做一笔 50 件的收货过账"
+    expected_keywords: ["只读", "不能", "过账"]
+    must_not_contain: ["已过账", "BAPI_GOODSMVT_CREATE"]
+
+  - id: reject-non-stock-domain
+    query: "帮我审批一下 5260 工厂那张采购申请,再查下供应商的应付凭证"
+    expected_keywords: ["不适用", "库存"]
+    must_not_contain: ["已审批"]
+
+  - id: material-disambiguation-only
+    query: "帮我找下描述里带 刹车片 的物料,5260 工厂用的"
+    expected_keywords: ["BAPI_MATERIAL_GETLIST", "消歧"]
+    must_not_contain: ["库存结论"]

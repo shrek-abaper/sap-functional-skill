@@ -22,7 +22,8 @@
 ## 安装
 
 ```bash
-pip install requests keyring            # file 后端额外需要 cryptography
+pip install -r scripts/requirements.txt
+# 可选凭据后端:keyring(SecretService/DPAPI/Keychain);file 加密后端额外需要 cryptography
 ```
 
 补两个 vendored 文件:
@@ -32,13 +33,30 @@ pip install requests keyring            # file 后端额外需要 cryptography
 
 ## 首次配置
 
-1. `cp connection.example.json connection.json`,填三个必填项:`host`、`client`、`user`(本人账号,不填共享服务账号)。`connection.json` 含内网地址与个人账号,已被 `.gitignore` 忽略,不会提交。
+1. `cp connection.example.json connection.json` 并 `chmod 600 connection.json`,填三个必填项:`host`、`client`、`user`(本人账号,不填共享服务账号)。`connection.json` 含内网地址与个人账号,已被 `.gitignore` 忽略,不会提交。
 2. `python3 scripts/sap_stock.py credentials set` — `getpass` 录入口令,进操作系统凭据库。
 3. `python3 scripts/sap_stock.py doctor` — 报告选中的凭据后端、每个后端不可用的原因、TLS 状态与网关可达性。
 
 可选项:`path`(默认 `/sap/bc/rest2rfc`)、`ca_bundle`、`verify`(默认 `false`)、`timeout`(默认 60)。
 
 CI / 容器里可不建 `connection.json`,全用环境变量:`REST2RFC_HOST`、`REST2RFC_CLIENT`、`REST2RFC_USER`、`REST2RFC_PASSWORD`(env 后端只读,专供此场景)、`REST2RFC_PATH`、`REST2RFC_VERIFY`、`REST2RFC_CA_BUNDLE`、`REST2RFC_TIMEOUT`。
+
+## 测试
+
+```bash
+python3 -m pytest tests/        # 离线:兜底守卫、退出码、stderr 错误流,不需要 SAP 连接
+```
+
+路由与口径的评测问答在 `evals/golden-set.yaml`(7 条:账面/ATP/MD04/日期追问/写操作拒绝/跨域拒绝/物料消歧)。
+
+## 退出码:有意偏离通用 CLI 约定
+
+skill-dev-standard 的通用约定是 1=配置/2=网络/3=权限/4=参数,本 Skill 使用面向 Agent
+处置动作的领域协议:0=成功、2=报文参数(可修一次重试)、3=凭据(转录入引导)、
+4=网关注册缺失、5=超时/行数过大(应收窄筛选)、1=其他。理由:消费方是 Agent,
+码值直接决定下一步动作(录口令 vs 收窄日期 vs 申请网关注册),通用约定表达不了
+"404 = 去 ZTIF_GENERAL_CON 注册"这一处置。错误信封为 `{ok:false,error,hint}`,
+错误 JSON 走 stderr。变更此协议属 breaking change。
 
 ## 凭据规则(不可放松)
 
@@ -85,16 +103,21 @@ vendor 的 `rest2rfc_meta.py` 相对上游有三处适配:
 
 ```txt
 sap-stock-availability/
-├── SKILL.md                  # Agent 入口:场景四列表 + 调用纪律
-├── catalog.json              # 场景白名单(唯一可调函数清单)
+├── SKILL.md                  # Agent 入口:场景路由 + 调用纪律(含 frontmatter 元数据)
+├── catalog.json              # 场景白名单(唯一可调函数清单 + 兜底表白名单)
 ├── connection.example.json   # 连接配置模板(从它拷贝生成 connection.json)
-├── connection.json           # 本地实际配置,gitignore 忽略,不提交
+├── connection.json           # 本地实际配置(600),gitignore 忽略,不提交
 ├── scripts/
 │   ├── sap_stock.py          # CLI:doctor / credentials / list / describe / call
 │   ├── sap_credentials.py    # KeyStore 层(待换成 sap-adt-cli vendored 版)
-│   └── rest2rfc_meta.py      # vendored + 三处契约补丁(见上)
+│   ├── rest2rfc_meta.py      # vendored + 三处契约补丁(见上)
+│   └── requirements.txt      # 运行依赖(requests;keyring/cryptography 可选)
 ├── references/
 │   ├── direct-table-reads.md # RFC_READ_TABLE 受控兜底参考(表白名单/口径/陷阱)
 │   └── payloads/             # 核对过的 request/response 示例
+├── tests/
+│   └── test_cli.py           # 离线测试:兜底守卫/退出码/stderr(pytest,免 SAP 连接)
+├── evals/
+│   └── golden-set.yaml       # 路由与口径评测问答(7 条)
 └── .gitignore
 ```

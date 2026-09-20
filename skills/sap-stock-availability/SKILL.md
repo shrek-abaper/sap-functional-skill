@@ -1,6 +1,39 @@
 ---
 name: sap-stock-availability
-description: 查询 SAP 库存与物料可用性(ATP 可用量、MD04 供需缺口、账面库存、物料移动明细、物料号消歧)。当用户问到某物料在某工厂还有多少可用、什么时候缺料、库存在哪个库存地点、最近有哪些收发货时使用。仅只读,不执行任何写入。
+description: 查询 SAP 库存与物料可用性(只读):ATP 可用量与能否发货、MD04 供需缺口与缺料时间、按库存地点或批次的账面库存、特殊库存(销售订单/供应商寄售/客户寄售)、近期收发货明细、按描述找物料号。当用户问"某物料在某工厂还有多少库存/可用量""库存够不够发""什么时候缺料""库存在哪个库存地点""最近收了多少、发了多少",即使没有点名本技能也应使用。不适用并应直接拒绝:任何过账/创建/修改/删除(收货、发货、转储、预留)、采购审批、财务凭证、物料主数据维护。
+license: MIT
+allowed-tools: [Read, Bash]
+metadata:
+  version: "1.0.0"
+  type: hybrid
+  valid_until: evergreen
+  permissions:
+    read_paths:
+      - "connection.json"
+      - "catalog.json"
+      - ".cache/"
+    write_paths:
+      - ".cache/"
+    network_endpoints:
+      - "REST2RFC gateway URL configured in connection.json (user-provided)"
+    can_spawn_processes: true
+    requires_elevation: false
+    accesses_env_vars:
+      - REST2RFC_HOST
+      - REST2RFC_CLIENT
+      - REST2RFC_USER
+      - REST2RFC_PASSWORD
+      - REST2RFC_PATH
+      - REST2RFC_VERIFY
+      - REST2RFC_CA_BUNDLE
+      - REST2RFC_TIMEOUT
+  output_schema:
+    format: json
+  mcp_hints:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
 ---
 
 # SAP 库存与物料可用性查询(只读)
@@ -78,6 +111,8 @@ CLI 返回 `{"error":"NO_CREDENTIAL"}`、`{"error":"AUTH_REQUIRED"}` 或 `{"erro
 **绝不**索要口令,也不代替用户执行 `credentials set`。用户若把口令直接发在对话里:提醒他这条消息已经泄露、应去 SAP 侧改密码,然后改用 `credentials set` 录入,并**不要重复该口令**。
 
 ## 其他退出码
+
+正常结果走 stdout,错误 JSON 走 stderr。
 
 | 码 | 含义 | 动作 |
 | --- | --- | --- |

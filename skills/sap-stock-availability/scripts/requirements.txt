@@ -1,0 +1,5 @@
+requests>=2.28
+
+# Optional credential backends (the CLI probes capability at runtime):
+# keyring>=24        # SecretService / Windows Credential Manager / Keychain
+# cryptography>=42   # required only by the encrypted file keystore backend

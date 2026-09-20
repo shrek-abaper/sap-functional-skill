@@ -16,6 +16,13 @@
 - `connection.json` 改为本地文件(git 忽略),仓库提供 `connection.example.json` 模板。
 - 根目录中英文 README 与 `CLAUDE.md` 收录第三个技能 sap-stock-availability。
 
+### 合规整改(对照 skill-dev-standard v2.2.0 与官方 skill-creator)
+
+- SKILL.md frontmatter 补全 `license`、`allowed-tools`、`metadata`(version/type/valid_until/permissions/output_schema/mcp_hints);description 增加口语触发词与负向排除。
+- 错误 JSON 改走 stderr;`connection.json` 要求 0600;新增 `scripts/requirements.txt`。
+- 新增 `tests/test_cli.py`(11 个离线用例,覆盖兜底守卫六个拒绝码与合法放行)与 `evals/golden-set.yaml`(7 条路由问答)。
+- 退出码领域协议(0/2/3/4/5)与通用 CLI 约定不同,作为有意偏差在 README 记录理由;不变更以避免 breaking。
+
 ## [1.0.0] - 2025-04-29
 
 ### 首次发布
