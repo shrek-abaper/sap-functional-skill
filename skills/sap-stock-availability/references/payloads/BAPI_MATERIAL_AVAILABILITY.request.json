@@ -1,16 +1,14 @@
 {
-  "plant": "1000",
-  "material": "000000000000123456",
+  "plant": "5260",
+  "material": "P0217636AB",
   "unit": "EA",
   "check_rule": "A",
-  "stge_loc": "",
-  "batch": "",
-  "customer": "",
-  "doc_number": "",
-  "itm_number": "000000",
-  "dec_for_rounding": 0,
-  "read_atp_lock": "",
-  "read_project_stock": "",
-  "wmdvsx": [],
-  "wmdvex": []
+  "wmdvsx": [
+    {
+      "req_date": "20260926",
+      "req_qty": 1.0,
+      "delkz": "",
+      "yline": 1
+    }
+  ]
 }

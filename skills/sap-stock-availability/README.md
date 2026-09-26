@@ -8,16 +8,17 @@
 
 已验证:
 
-- `BAPI_MATERIAL_STOCK_REQ_LIST`:MD04 口径,工厂级 WB 汇总行可用(实测 59 EA 与 MARD 账面一致)。
+- `BAPI_MATERIAL_STOCK_REQ_LIST`:MD04 口径,工厂级 WB 汇总行可用;EXPORTING 的 `MRP_STOCK_DETAIL`(非限制/质检/冻结等库存分类)、`MRP_LIST`、`RETURN` 均回传。
+- `BAPI_MATERIAL_GET_DETAIL`:EXPORTING 结构回传,`MATERIAL_GENERAL_DATA` 含物料描述、基本单位等(不含库存数量;`MATERIALPLANTDATA` 仅 PUR_GROUP/ISSUE_UNIT)。
+- `BAPI_MATERIAL_AVAILABILITY`:网关调用 200,`AV_QTY_PLT`/`WMDVEX`/`RETURN` 正常回传;真实 ATP 以 OPJJ(T441V)检查控制为准,`DIALOGFLAG=N` 表示该检查组+规则未配置、检查被跳过。
 - `RFC_READ_TABLE`:作为受控兜底,MARD/MCHB/MSKA/MKOL/MSKU 字段结构全部实测,CLI 有表白名单与主键过滤守卫。
 - `catalog.json` 的 `required` 已经 `describe` 实参树校对。
 
-遗留(均为网关 `sap-rest2rfc-gateway` 侧问题,不阻塞只读使用):
+遗留:
 
-1. binder 只绑定入参与 TABLES 参数,**EXPORTING 结构/标量不回传**:`BAPI_MATERIAL_GET_DETAIL` 返回空体、`BAPI_MATERIAL_AVAILABILITY` 的 ATP 数量取不到、`MRP_STOCK_DETAIL` 丢失。
-2. 非 200 响应不回写 body,binder 的 400 错误明细被丢弃,客户端只能看到空 400。
-3. 网关仓库自带的 `rest2rfc_meta.py` 与现行契约脱节,本 Skill 的 vendor 版带三处适配补丁(见下),待上游化。
-4. `BAPI_MATERIAL_GET_DETAIL` 的库存路由口径已纠正:BAPIMATDOC 实测仅 PUR_GROUP/ISSUE_UNIT,不含库存数量。
+1. 非 200 响应不回写 body,binder 的 400 错误明细被丢弃,客户端只能看到空 400(网关 `sap-rest2rfc-gateway` 侧;错误明细可在 `ZTIF_GENERAL_LOG` 查到)。
+2. 网关仓库自带的 `rest2rfc_meta.py` 与现行契约脱节,本 Skill 的 vendor 版带三处适配补丁(见下),待上游化;该工具会把 MATNR18 这类数据元素误标为 structure。
+3. 业务配置待补:实测检查组 KP 在 T441V 中无任何检查规则行,相关物料 ATP 被跳过,需 OPJJ 补配置后才有真实承诺量。
 
 ## 安装
 

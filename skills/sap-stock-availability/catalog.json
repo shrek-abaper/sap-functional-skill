@@ -4,17 +4,17 @@
   "functions": {
     "BAPI_MATERIAL_AVAILABILITY": {
       "required": ["material", "plant", "unit", "check_rule", "wmdvsx"],
-      "semantics": "ATP 可用量;受检查规则影响;material 按 describe 骨架传结构、需求数量/日期走 wmdvsx 表;实测该函数在当前网关上任何报文(含空体)均 400,binder 绑定阶段失败,修复前不可用",
+      "semantics": "ATP 可用量;受检查规则影响;material 为标量(MATNR18 基本字段,不是结构),需求数量/日期走 wmdvsx 表;当前网关可用,av_qty_plt/wmdvex/return 正常回传;真实承诺量以 OPJJ(T441V)检查控制为准,dialogflag=N 表示该检查组+规则未配置、检查被跳过,com_qty 仅为需求量回显,不得当作确认量",
       "max_rows": 200
     },
     "BAPI_MATERIAL_STOCK_REQ_LIST": {
       "required": ["material", "plant"],
-      "semantics": "MD04 供需快照;含计划要素;非承诺;当前网关只回传 TABLES,工厂级 WB 汇总可用,MRP_STOCK_DETAIL 结构(库存分类/单位)丢失",
+      "semantics": "MD04 供需快照;含计划要素;非承诺;当前网关回传 TABLES(工厂级 WB 汇总可用)与 EXPORTING(mrp_stock_detail 库存分类、mrp_list、return)",
       "max_rows": 500
     },
     "BAPI_MATERIAL_GET_DETAIL": {
       "required": ["material", "plant"],
-      "semantics": "物料主数据工厂/估价属性(采购组、发货单位、价格);实测 BAPIMATDOC 仅 PUR_GROUP/ISSUE_UNIT,不含任何库存数量;当前网关下返回空体",
+      "semantics": "物料主数据通用/工厂/估价属性;EXPORTING 结构回传,material_general_data 含物料描述、基本单位等;不含任何库存数量(materialplantdata 仅 PUR_GROUP/ISSUE_UNIT)",
       "max_rows": 200
     },
     "BAPI_GOODSMVT_GETITEMS": {

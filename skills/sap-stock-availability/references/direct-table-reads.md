@@ -44,8 +44,8 @@ TABLES:
 | `FIELDS` | 入/出 | RFC_DB_FLD | 入参填 `FIELDNAME`;返回时补 OFFSET/LENGTH/TYPE/FIELDTEXT |
 | `DATA` | 出 | TAB512 | 每行一个 `WA`,定长拼接或按 DELIMITER 分隔,行宽上限 **512** 字节 |
 
-EXPORTING 的 `ET_DATA` 是新版结构型参数——当前动态网关只回传 TABLES 参数,
-导出结构会丢失,因此取数只能靠 `DATA` 表。
+EXPORTING 的 `ET_DATA` 是新版结构型参数。网关现已回传 EXPORTING,但实测该函数
+`ET_DATA` 为空、结果仍在 `DATA` 表,因此取数以 `DATA` 表为准。
 
 ## 3. 表白名单与语义
 
@@ -181,8 +181,8 @@ FIELDS : MATNR, MTART, MATKL
 
 ## 8. 与其它路由的选择顺序
 
-1. 能不能发货 / ATP → `BAPI_MATERIAL_AVAILABILITY`(当前网关暂不可用,
-   等 EXPORTING 绑定修复,不要用 MARD 数字冒充承诺量);
+1. 能不能发货 / ATP → `BAPI_MATERIAL_AVAILABILITY`(网关已可用;但真实承诺量
+   以 OPJJ/T441V 配置为准,`DIALOGFLAG=N` 表示检查被跳过;不要用 MARD 数字冒充承诺量);
 2. 缺料时间线 / MD04 → `BAPI_MATERIAL_STOCK_REQ_LIST`(工厂级快照);
 3. 收发货明细 → `BAPI_GOODSMVT_GETITEMS`(必须带日期区间);
 4. 库存地点/批次账面数量、特殊库存 → 本兜底(MARD/MCHB/MSKA/MKOL/MSKU);

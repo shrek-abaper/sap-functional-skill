@@ -57,10 +57,10 @@ metadata:
 
 | 场景问句 | 函数 | 必填筛选 | 口径说明 |
 | --- | --- | --- | --- |
-| 还有多少可用量 / 能不能发 | BAPI_MATERIAL_AVAILABILITY | 物料、工厂、单位、检查规则 | ATP 可用量,受检查规则影响,**不等于**账面库存;当前网关不回传 EXPORTING 标量,暂取不到数 |
-| 什么时候缺料 / 供需缺口 | BAPI_MATERIAL_STOCK_REQ_LIST | 物料、工厂 | MD04 口径,含计划要素;是快照不是承诺;当前网关下仅工厂级 WB 汇总可用 |
+| 还有多少可用量 / 能不能发 | BAPI_MATERIAL_AVAILABILITY | 物料、工厂、单位、检查规则 | ATP 可用量,受检查规则影响,**不等于**账面库存;网关已可用,但真实承诺量以 OPJJ(T441V)为准,`DIALOGFLAG=N` 表示检查组+规则未配置、检查被跳过 |
+| 什么时候缺料 / 供需缺口 | BAPI_MATERIAL_STOCK_REQ_LIST | 物料、工厂 | MD04 口径,含计划要素;是快照不是承诺;工厂级 WB 汇总 + EXPORTING 的 MRP_STOCK_DETAIL(库存分类)均回传 |
 | 各库存地点的账面数量 / 批次库存 | RFC_READ_TABLE(受控兜底) | 表名、物料、工厂 | 直读 MARD/MCHB 当前值;不走转换出口;必须标注"直读表口径" |
-| 物料主数据工厂属性(采购组/发货单位) | BAPI_MATERIAL_GET_DETAIL | 物料、工厂 | 主数据属性,**不含库存数量**(实测 BAPIMATDOC 仅两字段);当前网关下返回空体 |
+| 物料主数据描述与工厂属性 | BAPI_MATERIAL_GET_DETAIL | 物料、工厂 | MATERIAL_GENERAL_DATA 含物料描述、基本单位等;**不含库存数量**(MATERIALPLANTDATA 仅 PUR_GROUP/ISSUE_UNIT) |
 | 最近的收发货明细 | BAPI_GOODSMVT_GETITEMS | MATERIAL_RA + PLANT_RA + **PSTNG_DATE_RA** | 范围表入参(SIGN/OPTION/LOW/HIGH);凭证行级;无日期区间会超时;空结果看 RETURN M7/842 |
 | 按描述找物料号 | BAPI_MATERIAL_GETLIST | MATERIALSHORTDESCSEL + PLANTSELECTION | 选择表入参(descr_low / plant_low,通配 I/CP);仅用于消歧,**不作为数据结论** |
 
@@ -98,10 +98,10 @@ CLI 本地拦截违规,退出码 2:`TABLE_NOT_ALLOWED` / `EMPTY_FIELD_LIST` / `M
 - 截断时必须告知"仅前 N 行",不得对全量做合计或趋势判断。
 - ATP 与账面库存不得混用或相加。用户问"能不能发货"走 ATP;问"仓里有多少"走账面。
 - `RETURN` 里的 MESSAGE 只给人读,不拿它做程序判定。
-- **ATP 函数不可用时的降级**:若 `BAPI_MATERIAL_AVAILABILITY` 返回 400/500(当前网关 binder 对该函数任何报文都 400),最多重试确认一次,然后:
+- **取不到 ATP 确认量时的降级**:发生两种情况之一——接口返回 400/500(最多重试确认一次),或返回 200 但 `DIALOGFLAG=N`(该检查组+规则在 T441V 未配置、检查被跳过;此时 WMDVEX-COM_QTY 只是需求量回显),然后:
   - 需求量 > 非限制在库(MARD/MD04 WB)→ 可下保守结论"现在不能足额发",并写明真实 ATP ≤ 在库、ATP 确认量取不到;
   - 需求量 ≤ 在库 → **不得**承诺可发(在库可能已被预留/交货占用),只能回答在库数并建议 GUI 用 CO09 按检查规则复核;
-  - 任何情况下不得把账面/MD04 数字冒充 ATP 确认量。
+  - 任何情况下不得把账面/MD04 数字或"检查被跳过时的回显量"冒充 ATP 确认量。
 
 ## 凭据配置引导(仅在退出码 3 时触发)
 
