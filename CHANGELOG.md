@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+### sap-stock-availability — 网关 EXPORTING 修复、ATP 链路验证与 1.0.0 发布(2026-09-26)
+
+- 网关 `sap-rest2rfc-gateway` binder 两处缺陷修复(本 Skill 侧同步更新文档):EXPORTING 参数自动补绑(`IV_BIND_EXPORTS`)、数值经 GENERATE 变科学计数法后压缩 DEC 无法解析的转换修复(MOVE_VALUE)。
+- `BAPI_MATERIAL_AVAILABILITY` 端到端验证通过:`AV_QTY_PLT`/`WMDVEX`/`RETURN` 正常回传;确认 `MATERIAL` 为标量(MATNR18),删除示例报文中不存在的 `READ_PROJECT_STOCK`。
+- 发现并记录业务配置缺口:物料可用性检查组 KP 在 T441V(OPJJ)无任何检查规则行,相关物料 `DIALOGFLAG=N`、检查被跳过;降级规则补充"回显量不得冒充 ATP 确认量"。
+- `BAPI_MATERIAL_GET_DETAIL` EXPORTING 结构恢复回传,`MATERIAL_GENERAL_DATA` 含物料描述/基本单位;MRP 响应恢复 `MRP_STOCK_DETAIL` 库存分类。
+- 调用报文默认走 stdin(`--payload -`),不再产生 /tmp 临时文件;catalog/README/SKILL/direct-table-reads 口径同步更新。
+
 ### sap-stock-availability — 真实 S/4HANA 首跑与受控直读表兜底(2026-09-20)
 
 - 首次对真实 S/4HANA(client 800)端到端联调:`doctor`、`describe`、`call` 全部跑通。

@@ -1,5 +1,4 @@
 # 凭据零落盘:以下任何一项被提交都算事故
- secrets.json
 secrets.json
 .sap-stock/
 *.env
