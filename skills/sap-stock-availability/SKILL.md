@@ -50,7 +50,7 @@ metadata:
 2. **选函数**:从下表按问句选一个函数。无法判定时问用户一个消歧问题,不要"全部试一遍"。
 3. **读函数说明**:`python3 scripts/sap_stock.py describe <FUNC>`。输出参数树 + SE37 长文本 + 请求骨架。**不要凭记忆拼参数名**。
 4. **组装报文**:把对话里的业务值填进骨架。必填筛选缺一个就向用户要,绝不自己编默认值(工厂、日期区间、检查规则尤其不能猜)。
-5. **调用**:`python3 scripts/sap_stock.py call <FUNC> --payload <file.json>`。
+5. **调用**:报文优先走 stdin——`printf '%s' '<json>' | python3 scripts/sap_stock.py call <FUNC> --payload -`,不落盘;确需调试复用才写临时文件(放 `/tmp`,用后即删)。临时文件不是 skill 组成部分,清空不影响使用。
 6. **叙事说明**:先给结论数字,再说口径,最后附调用事实。格式见下。
 
 ## 场景 → 函数 → 必填筛选 → 口径
