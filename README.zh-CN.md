@@ -55,6 +55,12 @@
 | [`sap-sto-create`](skills/sap-sto-create/) | 执行型（写入） | 主动触发——通过 S/4HANA OData API 创建 STO 调拨订单，Python + Java/JCo，先 preview 后 create |
 | [`sap-stock-availability`](skills/sap-stock-availability/) | 执行型（只读） | 主动触发——经 REST2RFC 网关查询账面库存、MD04 供需与物料移动明细；白名单 BAPI 加受控直读表兜底，纯 Python |
 
+仓库在 [`docs/`](docs/) 下还提供独立于具体技能的跨项目参考文档：
+
+| 文档 | 说明 |
+|---|---|
+| [`docs/authentication/`](docs/authentication/) | SAP↔AI 对接（CLI / MCP / OData）认证参考手册：决策树、各方式优缺点详解与 Basic、SPNEGO、X.509、OIDC/OAuth2、边界网关、客户端模式的逐步落地方案 |
+
 ---
 
 ## sap-trench-skill
@@ -175,6 +181,8 @@ Claude Code 会在对话启动时自动发现并加载已安装的技能。
 
 ```
 sap-functional-skill/
+├── docs/
+│   └── authentication/          # 跨项目认证参考手册（总览 + 7 个专题）
 └── skills/
     ├── sap-trench-skill/          # 知识型技能——SAP 实战排查
     │   ├── SKILL.md               # 触发层（路由表 + 关键词）

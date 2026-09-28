@@ -55,6 +55,12 @@ The collection currently contains three skills — one knowledge skill and two e
 | [`sap-sto-create`](skills/sap-sto-create/) | Execution (write) | Active — creates STO transfer orders via S/4HANA OData API. Python + Java/JCo. Preview-before-create gate. |
 | [`sap-stock-availability`](skills/sap-stock-availability/) | Execution (read-only) | Active — queries book stock, MD04 supply/demand and goods movements via the REST2RFC gateway. Whitelisted BAPIs plus a guarded table-read fallback. Python. |
 
+The repository also ships cross-project reference documentation under [`docs/`](docs/), independent of any single skill:
+
+| Document | Description |
+|---|---|
+| [`docs/authentication/`](docs/authentication/) | Authentication playbook for SAP↔AI integration (CLI / MCP / OData): decision tree, detailed pros/cons and step-by-step implementation for Basic, SPNEGO, X.509, OIDC/OAuth2, edge-gateway and client patterns. |
+
 ---
 
 ## sap-trench-skill
@@ -175,6 +181,8 @@ Claude Code discovers and loads skills automatically at conversation startup.
 
 ```
 sap-functional-skill/
+├── docs/
+│   └── authentication/          # Cross-project auth playbook (README + 7 guides)
 └── skills/
     ├── sap-trench-skill/          # Knowledge skill — SAP field troubleshooting
     │   ├── SKILL.md               # Trigger layer (routing table + keywords)
